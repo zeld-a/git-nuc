@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { serveStatic } from "hono/bun";
 import { repoRoutes } from "./routes/repos";
 import { logger } from "./lib/logger";
+import { gitRoutes } from "./routes/git";
 
 const app = new Hono();
 
@@ -46,8 +47,6 @@ app.get("/health", (c) => {
   });
 });
 
-app.route("/repos", repoRoutes);
-
 app.onError((err, c) => {
   logger.error("Unhandled error", {
     error: err.message,
@@ -55,6 +54,9 @@ app.onError((err, c) => {
   });
   return c.text("Internal Server Error", 500);
 });
+
+app.route("/repos", repoRoutes);
+app.route("/repos", gitRoutes);
 
 export default app;
 

@@ -1,8 +1,8 @@
 import { readdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { spawn } from "bun";
 import { logger } from "./logger";
+import { runGit } from "./git";
 
 const REPO_DIR = "./repos";
 
@@ -38,33 +38,11 @@ export const createRepo = async (name: string) => {
       repo: name,
     });
 
-    const command = ["git", "init", "--bare", repoPath];
-
-    logger.info("Running git command", {
-      command,
-    });
-
-    const proc = spawn(command);
-
-    const exitCode = await proc.exited;
-    const stderr = await new Response(proc.stderr).text();
-
-    if (exitCode !== 0) {
-      logger.error("Git command failed", {
-        command,
-        exitCode,
-        stderr,
-      });
-
-      throw new Error(
-        stderr.trim() || "Failed to initialize repository"
-      );
-    }
-
-    logger.info("Git command completed", {
-      command,
-      exitCode,
-    });
+    await runGit([
+      "init",
+      "--bare",
+      repoPath,
+    ]);
 
     logger.info("Repository created", {
       repo: name,
